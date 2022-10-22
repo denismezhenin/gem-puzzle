@@ -2,45 +2,71 @@
 const wrapper = document.createElement('div')
 const menu = document.createElement('div')
 const field = document.createElement('div')
+const indicatorsWrapper = document.createElement('div')
 const restartButton = document.createElement('button')
+const movesIndicator = document.createElement('span')
+const timesIndicator = document.createElement('div')
+const minutes = document.createElement('span')
+const separator= document.createElement('span')
+const seconds = document.createElement('span')
 wrapper.classList.add('wrapper')
 field.classList.add('field')
 menu.classList.add('menu')
+indicatorsWrapper.classList.add('indicators')
+restartButton.classList.add('button-start')
+movesIndicator.classList.add('moves-indicator')
+timesIndicator.classList.add('time-indicator')
 document.body.append(wrapper)
 wrapper.append(menu)
+wrapper.append(indicatorsWrapper)
+indicatorsWrapper.append(timesIndicator)
+indicatorsWrapper.append(movesIndicator)
+timesIndicator.append(minutes)
+timesIndicator.append(separator)
+timesIndicator.append(seconds)
 menu.append(restartButton)
 wrapper.append(field)
+restartButton.innerHTML = 'Shuffle and start'
+let moves = 0
+movesIndicator.innerHTML = `Moves: ${moves}`
+minutes.innerHTML  = '00'
+seconds.innerHTML  = '00'
+separator.innerHTML  = ':'
 
 // filed
+
+
+
 let blocksNumber = 16;
 let side = 4
-
-for(let i=0; i <blocksNumber; i++) {
-let div = document.createElement('div')
-div.innerHTML = i;
-div.classList.add('block');
-div.classList.add(`block${i}`);
-field.append(div)
+let blockArray
+let stopwatch
+const createBlocks = () => {
+	for(let i=0; i <blocksNumber; i++) {
+		let div = document.createElement('div')
+		div.innerHTML = i;
+		div.classList.add('block');
+		div.classList.add(`block${i}`);
+		field.append(div)
+		}
+		blockArray = Array.from(document.querySelectorAll('.block'))
+		blockArray = blockArray.sort(() => Math.random() - 0.5)
 }
 
-let blockArray = Array.from(document.querySelectorAll('.block'))
-// blockArray.sort(Math.random() - 0.5)
+
+
 let matrix = [];
-// console.log(blockArray)
-// let b = blockArray.map(item => console.log(item.className))
-blockArray = blockArray.sort(() => Math.random() - 0.5)
-// console.log(blockArray)
-const buildmatrix = () => {
+const buildMatrix = () => {
 	
 	for (let i=0 ; i < side; i++) {
 		matrix.push([]);
 	}
 	return matrix
 } 
-buildmatrix()
+// buildmatrix()
 // console.log(blockArray[0])
 
-function getMatrix (blockArray) {
+function setBlocksPosition (blockArray) {
 	for (let i=0 ; i < side; i++) {
 	for (let j=0 ; j < side; j++) {
 		matrix[i][j] = blockArray[side * i + j] 
@@ -50,13 +76,38 @@ function getMatrix (blockArray) {
 	}
 	return matrix
 }
-getMatrix(blockArray)
 
-let X
-let Y
-let x
-let y
-let target
+const startTimer = () => {
+	let sec = 0
+	let min = 0
+	clearInterval(stopwatch);
+	stopwatch = setInterval(() => {
+		seconds++
+		seconds.innerHTML = sec 
+		if (seconds > 60) {
+			min++
+			minutes.innerHTML = min
+		}
+	}, 100)
+}
+
+restartButton.addEventListener('click', () => {
+	console.log(blockArray.length)
+	blockArray.forEach(element => {
+		element.remove()
+	});
+	createBlocks()
+	buildMatrix()
+	setBlocksPosition(blockArray)
+	getZero()
+	startTimer()
+	moves = 0
+	movesIndicator.innerHTML = `Moves: ${moves}`
+})
+
+
+// move functionality
+let X, Y, x, y, target;
 function getZero() {
 	for (let i=0 ; i < side; i++) {
 		for (let j=0 ; j < side; j++) {
@@ -68,31 +119,34 @@ function getZero() {
 	}
 }
 
-getZero()
+
 
 field.addEventListener('click', (e) => {
 	target = e.target
-	console.log(target)
+	// console.log(target)
 	getTarget()
-	console.log(`X :${X} x :${x} Y: ${Y}, y: ${y}`)
+	// console.log(`X :${X} x :${x} Y: ${Y}, y: ${y}`)
 	
-	console.log(matrix)
+	// console.log(matrix)
 	if ((Math.abs(X-x) == 1) && Y ==y) {
-		console.log(`X :${X} x :${x} Y: ${Y}, y: ${y}`)
+		// console.log(`X :${X} x :${x} Y: ${Y}, y: ${y}`)
 		e.target.style.left = `${X * 200}px`;
 		matrix[Y][X].style.left = `${x * 200}px`;
 		[matrix[Y][X], matrix[y][x]] = [matrix[y][x], matrix[Y][X]];
 		X=x
-		console.log(matrix)
-		console.log(`X :${X} x :${x} Y: ${Y}, y: ${y}`)
+		// console.log(matrix)
+		// console.log(`X :${X} x :${x} Y: ${Y}, y: ${y}`)
+		updatemoves()
 	}
 	if ((Math.abs(Y-y) == 1) && X == x) {
 		e.target.style.top = `${Y * 200}px`;
 		matrix[Y][X].style.top = `${y * 200}px`;
-		console.log(matrix);
+		// console.log(matrix);
 		[matrix[Y][X], matrix[y][x]] = [matrix[y][x], matrix[Y][X]];
 		Y = y;
-		console.log(matrix);
+		// console.log(matrix);
+		moves++
+		updatemoves()
 	}
 
 })
@@ -107,6 +161,11 @@ function getTarget() {
 			}
 }
 	}
+}
+
+const updatemoves = () => {
+	moves++
+	return movesIndicator.innerHTML = `Moves: ${moves}`
 }
 // console.log(matrix)
 // const addMoveClass = () => {
@@ -132,3 +191,10 @@ function getTarget() {
 // 	}
 // 	}
 // addMoveClass()
+
+
+//initial shuffle
+createBlocks()
+buildMatrix()
+setBlocksPosition(blockArray)
+getZero()
