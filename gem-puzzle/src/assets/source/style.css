@@ -1,1 +1,36 @@
-/*# sourceMappingURL=style.css.map */
+* {
+  box-sizing: border-box;
+}
+
+.wrapper {
+  margin: 0 auto;
+  width: 800px;
+  padding-bottom: 50%;
+}
+
+.field {
+  width: 800px;
+  height: 800px;
+  position: relative;
+  background-color: aqua;
+}
+
+.block {
+  position: absolute;
+  width: 25%;
+  height: 25%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: yellow;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  transition: 0.2s;
+}
+
+.block0 {
+  display: none;
+}/*# sourceMappingURL=style.css.map */
