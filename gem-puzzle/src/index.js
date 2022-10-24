@@ -6,7 +6,7 @@ const indicatorsWrapper = document.createElement('div')
 const restartButton = document.createElement('button')
 const soundButton = document.createElement('button')
 const easyModeButton = document.createElement('button')
-const saveeButton = document.createElement('button')
+const saveButton = document.createElement('button')
 const records = document.createElement('button')
 const movesIndicator = document.createElement('span')
 const timesIndicator = document.createElement('div')
@@ -50,7 +50,7 @@ winWrapper.append(winText)
 menu.append(selectionsLabel)
 menu.append(selections)
 menu.append(easyModeButton)
-menu.append(saveeButton)
+menu.append(saveButton)
 menu.append(records)
 selections.append(blocksField3x3)
 selections.append(blocksField4x4)
@@ -63,7 +63,7 @@ selectionsLabel.for = 'field-size'
 selectionsLabel.innerHTML = "Chose your field size"
 easyModeButton.innerHTML = 'Easy mode'
 restartButton.innerHTML = 'Shuffle and start'
-saveeButton.innerHTML = 'Save'
+saveButton.innerHTML = 'Save'
 records.innerHTML = 'Records'
 let moves = 0
 movesIndicator.innerHTML = `Moves: ${moves}`
@@ -114,10 +114,52 @@ const createBlocks = () => {
 		div.style.width = `${blockSize}px`
 		div.style.height = `${blockSize}px`
 		blockArray = Array.from(document.querySelectorAll('.block'))
-		blockArray = blockArray.sort(() => Math.random() - 0.5)
-		}
+		
+		// do {
+			blockArray = SortArray(blockArray)
+		// } while (checkSolvable(blockArray) != true)
+}
 }
 
+const SortArray = (arr) => {
+	arr = arr.sort(() => Math.random() - 0.5)
+	// checkSolvable(arr)
+	return arr
+}
+
+const checkSolvable = (arr) => {
+	let counter = 0
+	let zeroblockIndex
+	let temp = matrix.flat()
+	for (let i=0 ; i < temp .length; i++) {
+		for (let j=i ; j < temp.length; j++) {
+			if (temp[i].innerHTML == 0) {
+				zeroblockIndex = i;
+			}
+			if (temp[i].innerHTML > temp[j].innerHTML && temp[j].innerHTML > 0) {
+				counter++;
+			}
+		}
+	}
+	let zeroblockRow = Math.floor(zeroblockIndex / side)
+	// console.log(counter, zeroblockIndex, zeroblockRow)
+if(side % 2 != 0) {
+	if((counter) % 2 != 0) {
+		startNewGame()
+	}
+}
+if(side % 2 == 0) {
+	if((counter + zeroblockRow) % 2 == 0) {
+		startNewGame()
+	}
+}
+
+	// if((counter + zeroblockRow) % 2 != 0) {
+	// 	startNewGame()
+	// }
+	
+	// return true
+}
 // const sortBlocks = () => {
 // 			blockArray = Array.from(document.querySelectorAll('.block'))
 // 		blockArray = blockArray.sort(() => Math.random() - 0.5)
@@ -160,9 +202,7 @@ const startTimer = () => {
 	}, 1000)
 }
 
-
-
-restartButton.addEventListener('click', () => {
+function startNewGame() {
 	matrix.length = 0
 	etalon.length = 0
 	// console.log(blockArray.length)
@@ -178,15 +218,20 @@ restartButton.addEventListener('click', () => {
 	startTimer()
 	startTimer()
 	makeEtalonArray()
+	checkSolvable(matrix)
 	sec = 0
  	min = 0
 	moves = 0
 	movesIndicator.innerHTML = `Moves: ${moves}`
 	minutes.innerHTML  = '00'
 	seconds.innerHTML  = '00'
-	console.log(easyMode())
-	
-})
+}
+
+
+
+restartButton.addEventListener('click', startNewGame)
+
+
 
 //audio 
 let isMute = false
@@ -237,7 +282,7 @@ field.addEventListener('click', (e) => {
 		e.target.style.left = `${X * blockSize}px`;
 		matrix[Y][X].style.left = `${x * blockSize}px`;
 		[matrix[Y][X], matrix[y][x]] = [matrix[y][x], matrix[Y][X]];
-		X=x
+		 X=x
 		// console.log(matrix)
 		// console.log(`X :${X} x :${x} Y: ${Y}, y: ${y}`)
 		updatemoves()
@@ -362,7 +407,7 @@ function setRecord() {
 	})
 
 	localStorage.setItem('results', JSON.stringify(resultArray));
-	console.log(JSON.parse(localStorage.getItem('results')))
+	// console.log(JSON.parse(localStorage.getItem('results')))
 
 }
 
@@ -379,7 +424,7 @@ function showRecords() {
 	if(localStorage.getItem('results')) {
 		resultArray = JSON.parse(localStorage.getItem('results'))
 	}
-	console.log(resultArray.length)
+	// console.log(resultArray.length)
 	if (resultArray.length == 0) {
 		let p = document.createElement('p')
 		p.innerHTML = "No records yet"
@@ -387,19 +432,24 @@ function showRecords() {
 	} else {
 		for(let i=0; i < resultArray.length; i++) {
 			let p = document.createElement('p')
-			p.innerHTML = `${i+1}. Moves: ${resultArray[i].moves}  Time: ${resultArray[i].min}:${resultArray[i].seconds}  Field size: ${resultArray[i].boardSize}`;
+			p.innerHTML = `${i+1}. Moves: ${resultArray[i].moves}  Time: ${resultArray[i].minutes}:${resultArray[i].seconds}  Field size: ${resultArray[i].boardSize}`;
 			recordsWrapper.append(p)
 			}
 	}
 	
 }
 
+recordsWrapper.addEventListener('click', () => {
+	recordsWrapper.classList.remove('recordsWrapper_active')
+	recordsWrapper.innerHTML = ""
+})
+
 // console.log(matrix)
 
 // easy mode 
 easyModeArray = []
 const easyMode = () => {
-	console.log(blockArray)
+	// console.log(blockArray)
 	easyModeArray = blockArray.slice(0)
 	easyModeArray = easyModeArray.sort( function(a, b) {
 		return a.innerHTML - b.innerHTML
@@ -445,7 +495,7 @@ easyModeButton.addEventListener('click', () => {
 
 // save game
 
-saveeButton.addEventListener('click', 
+saveButton.addEventListener('click', 
 savegame)
 let savedArray = [];
 function savegame() {
@@ -460,7 +510,7 @@ function savegame() {
 		blocksNumber: `${blocksNumber}`,
 		blockSize: `${blockSize}`,
 	}
-	console.log(saveObj)
+	// console.log(saveObj)
 
 	localStorage.setItem('lastSave', JSON.stringify(save));
 	localStorage.setItem('lastSaveIndicators', JSON.stringify(saveObj));
