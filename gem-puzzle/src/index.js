@@ -6,12 +6,18 @@ const indicatorsWrapper = document.createElement('div')
 const restartButton = document.createElement('button')
 const soundButton = document.createElement('button')
 const easyModeButton = document.createElement('button')
+const saveeButton = document.createElement('button')
+const records = document.createElement('button')
 const movesIndicator = document.createElement('span')
 const timesIndicator = document.createElement('div')
 const minutes = document.createElement('span')
 const separator= document.createElement('span')
 const seconds = document.createElement('span')
+const winWrapper = document.createElement('div')
+const recordsWrapper = document.createElement('div')
+const winText = document.createElement('p')
 const selections = document.createElement('select')
+const selectionsLabel = document.createElement('label')
 const blocksField3x3 = document.createElement('option')
 const blocksField4x4 = document.createElement('option')
 const blocksField5x5 = document.createElement('option')
@@ -19,6 +25,8 @@ const blocksField6x6 = document.createElement('option')
 const blocksField7x7 = document.createElement('option')
 const blocksField8x8 = document.createElement('option')
 wrapper.classList.add('wrapper')
+winWrapper.classList.add('winWrapper')
+recordsWrapper.classList.add('recordsWrapper')
 field.classList.add('field')
 menu.classList.add('menu')
 indicatorsWrapper.classList.add('indicators')
@@ -36,16 +44,27 @@ timesIndicator.append(seconds)
 menu.append(restartButton)
 menu.append(soundButton)
 wrapper.append(field)
+wrapper.append(winWrapper)
+wrapper.append(recordsWrapper)
+winWrapper.append(winText)
+menu.append(selectionsLabel)
 menu.append(selections)
 menu.append(easyModeButton)
+menu.append(saveeButton)
+menu.append(records)
 selections.append(blocksField3x3)
 selections.append(blocksField4x4)
 selections.append(blocksField5x5)
 selections.append(blocksField6x6)
 selections.append(blocksField7x7)
 selections.append(blocksField8x8)
+selections.name = 'field-size'
+selectionsLabel.for = 'field-size'
+selectionsLabel.innerHTML = "Chose your field size"
 easyModeButton.innerHTML = 'Easy mode'
 restartButton.innerHTML = 'Shuffle and start'
+saveeButton.innerHTML = 'Save'
+records.innerHTML = 'Records'
 let moves = 0
 movesIndicator.innerHTML = `Moves: ${moves}`
 minutes.innerHTML  = '00'
@@ -70,7 +89,7 @@ blocksField4x4.selected = true
 selections.id = 'select';
 let side = 4
 let blocksNumber = 16;
-let blockArray
+let blockArray = []
 let stopwatch;
 let sec = 0
 let min = 0
@@ -82,7 +101,7 @@ let matrixFlat = []
 selections.addEventListener('change', function(){  
 	side= this.value;
 	blocksNumber = Math.pow(side, 2);
-	blockSize = fieldWidth / side
+	blockSize = fieldWidth / side;
   });
 
 const createBlocks = () => {
@@ -141,13 +160,17 @@ const startTimer = () => {
 	}, 1000)
 }
 
+
+
 restartButton.addEventListener('click', () => {
 	matrix.length = 0
 	etalon.length = 0
 	// console.log(blockArray.length)
-	blockArray.forEach(element => {
-		element.remove()
-	});
+	if (blockArray.length > 0) {
+		blockArray.forEach(element => {
+			element.remove()
+		});
+	}
 	createBlocks()
 	buildMatrix()
 	setBlocksPosition(blockArray)
@@ -186,8 +209,6 @@ const playAudio = () => {
 }
 
 
-
-
 // move functionality
 let X, Y, x, y, target;
 function getZero() {
@@ -200,8 +221,6 @@ function getZero() {
 }
 	}
 }
-
-
 
 field.addEventListener('click', (e) => {
 	target = e.target
@@ -286,18 +305,18 @@ const updatemoves = () => {
 
 // win
 
-let etalon = []
+let etalon = [];
+let resultArray = []
 
 const makeEtalonArray = () => {
 	for(let i = 1; i < blocksNumber; i++) {
 		etalon.push(i)
 	}
 }
-// makeEtalonArray()
 
 function compareToEtalon() {
 	// console.log(matrix)
-	let isWin
+	// let isWin
 	matrixFlat = matrix.flat()
 	// matrixFlat = matrixFlat.flat()
 
@@ -314,7 +333,65 @@ function compareToEtalon() {
 		}
 
 }
+showWin()
+setRecord()
 return true
+}
+
+function showWin() {
+	clearInterval(stopwatch);
+	winWrapper.classList.add('winWrapper_active')
+	winText.innerHTML = `Hooray! You solved the puzzle in ${minutes.innerHTML}:${seconds.innerHTML} and ${moves} moves!`
+}
+
+function setRecord() {
+	let temp = {
+		minutes:  `${minutes.innerHTML}`,
+		seconds:  `${seconds.innerHTML}`,
+		moves: `${moves}`,
+		boardSize: `${side}x${side}`,
+	}
+	if(localStorage.getItem('results')) {
+		resultArray = JSON.parse(localStorage.getItem('results'))
+	}
+	if(resultArray.length > 9) resultArray.length = 9;
+	// resultArray.length = 9
+	resultArray.push(temp)
+	resultArray.sort(function(a, b) {
+		return a.moves-b.moves
+	})
+
+	localStorage.setItem('results', JSON.stringify(resultArray));
+	console.log(JSON.parse(localStorage.getItem('results')))
+
+}
+
+winWrapper.addEventListener('click', () => {
+	winWrapper.classList.remove('winWrapper_active')
+	winText.innerHTML = ''
+})
+
+records.addEventListener('click', showRecords)
+
+
+function showRecords() {
+	recordsWrapper.classList.add('recordsWrapper_active')
+	if(localStorage.getItem('results')) {
+		resultArray = JSON.parse(localStorage.getItem('results'))
+	}
+	console.log(resultArray.length)
+	if (resultArray.length == 0) {
+		let p = document.createElement('p')
+		p.innerHTML = "No records yet"
+		recordsWrapper.append(p)
+	} else {
+		for(let i=0; i < resultArray.length; i++) {
+			let p = document.createElement('p')
+			p.innerHTML = `${i+1}. Moves: ${resultArray[i].moves}  Time: ${resultArray[i].min}:${resultArray[i].seconds}  Field size: ${resultArray[i].boardSize}`;
+			recordsWrapper.append(p)
+			}
+	}
+	
 }
 
 // console.log(matrix)
@@ -340,9 +417,11 @@ const easyMode = () => {
 easyModeButton.addEventListener('click', () => {
 	matrix.length = 0
 	etalon.length = 0
-	blockArray.forEach(element => {
-		element.remove()
-	});
+	if (blockArray.length > 0) {
+		blockArray.forEach(element => {
+			element.remove()
+		});
+	}
 	// easyMode()
 	createBlocks()
 	buildMatrix()
@@ -363,8 +442,81 @@ easyModeButton.addEventListener('click', () => {
 	// console.log(etalon)
 })
 
+
+// save game
+
+saveeButton.addEventListener('click', 
+savegame)
+let savedArray = [];
+function savegame() {
+	// let saveArray = matrix.flat()
+	// console.log(saveArray)
+	let save = matrix.flat().map(el => el.innerHTML)
+	let saveObj = {
+		minutes:  `${minutes.innerHTML}`,
+		seconds:  `${seconds.innerHTML}`,
+		moves: `${moves}`,
+		side: `${side}`,
+		blocksNumber: `${blocksNumber}`,
+		blockSize: `${blockSize}`,
+	}
+	console.log(saveObj)
+
+	localStorage.setItem('lastSave', JSON.stringify(save));
+	localStorage.setItem('lastSaveIndicators', JSON.stringify(saveObj));
+	// localStorage.lastsave = JSON.stringify(dd)
+	// console.log(localStorage.setItem('lastSaveIndicators', JSON.stringify(saveObj)))
+
+
+
+	// let d = JSON.stringify(saveArray[0], Object.getOwnPropertyNames(target["__proto__"]));
+	// console.log(d)
+}
+
+function compareArrays(arr) {
+	for (let i = 0; i < arr.length; i++) {
+		for (let j = 0; j < blockArray.length; j++) {
+			if(arr[i] == blockArray[j].innerHTML) {
+				savedArray.push(blockArray[j])
+			}
+		} 
+	}
+}
+
+window.addEventListener('load', checkLocalStorage)
+
+function checkLocalStorage() {
+if(localStorage.getItem('lastSave')) {
+	matrix.length = 0
+	etalon.length = 0
+	if (blockArray.length > 0) {
+		blockArray.forEach(element => {
+			element.remove()
+		});
+	}
+	side = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).side;
+	blocksNumber = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).blocksNumber;
+	blockSize = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).blockSize;
+	createBlocks()
+	buildMatrix()
+	compareArrays(JSON.parse(localStorage.getItem('lastSave')))
+	setBlocksPosition(savedArray)
+	getZero()
+	startTimer()
+	startTimer()
+	makeEtalonArray()
+	sec = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).seconds;
+ 	min = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).minutes;
+	moves = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).moves;
+	movesIndicator.innerHTML = `Moves: ${moves}`
+	minutes.innerHTML  = `${min}`
+	seconds.innerHTML  = `${sec}`
+}
+}
+
 //initial shuffle
-createBlocks()
-buildMatrix()
-setBlocksPosition(blockArray)
-getZero()
+// createBlocks()
+// buildMatrix()
+// setBlocksPosition(blockArray)
+// getZero()
+
