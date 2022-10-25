@@ -1,27 +1,5 @@
-@charset "UTF-8";
 * {
   box-sizing: border-box;
-}
-
-html {
-  background: url("./assets/resourse/img/1.jpeg");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-attachment: fixed;
-}
-html:after {
-  content: “”;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  background: url("./assets/resourse/img/1.jpeg");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-attachment: fixed;
-  width: 100px;
-  height: 100px;
 }
 
 body {
@@ -30,25 +8,6 @@ body {
   font-weight: 400;
   font-size: 16px;
   line-height: 140%;
-  background: url("./assets/resourse/img/1.jpeg");
-  position: relative;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-attachment: fixed;
-}
-body:after {
-  content: “”;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  background-image: url("./assets/resourse/img/1.jpeg");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-attachment: fixed;
-  width: 100px;
-  height: 100px;
 }
 
 .wrapper {
@@ -117,7 +76,8 @@ body:after {
 }
 
 .block0 {
-  display: none;
+  background-color: aqua;
+  color: aqua;
 }
 
 .winWrapper p {
