@@ -203,6 +203,7 @@ function startNewGame() {
 	checkSolvable(matrix)
 	removeMoveClass()
 	addMoveClass()
+	field.addEventListener('click', moveBlocks)
 	sec = 0
  	min = 0
 	moves = 0
@@ -247,12 +248,14 @@ function getZero() {
 	}
 }
 
-field.addEventListener('click', (e) => {
-	target = e.target
+
+
+function moveBlocks(event) {
+	target = event.target
 	getTarget()
 	if ((Math.abs(X-x) == 1) && Y ==y) {
 		playAudio()
-		e.target.style.left = `${X * blockSize}px`;
+		event.target.style.left = `${X * blockSize}px`;
 		matrix[Y][X].style.left = `${x * blockSize}px`;
 		[matrix[Y][X], matrix[y][x]] = [matrix[y][x], matrix[Y][X]];
 		 X=x
@@ -263,17 +266,16 @@ field.addEventListener('click', (e) => {
 	}
 	if ((Math.abs(Y-y) == 1) && X == x) {
 		playAudio()
-		e.target.style.top = `${Y * blockSize}px`;
+		event.target.style.top = `${Y * blockSize}px`;
 		matrix[Y][X].style.top = `${y * blockSize}px`;
 		[matrix[Y][X], matrix[y][x]] = [matrix[y][x], matrix[Y][X]];
 		Y = y;
-		moves++
 		updatemoves()
 		compareToEtalon()
 		removeMoveClass()
 		addMoveClass()
 	}
-})
+}
 
 function getTarget() {
 	for (let i=0 ; i < side; i++) {
@@ -293,47 +295,47 @@ const updatemoves = () => {
 
 const addMoveClass = () => {
 	matrix[Y][X].id = "target"
-	matrix[Y][X].addEventListener('drop', drop_handler)
-	matrix[Y][X].addEventListener('dragover', dragover_handler)
+	matrix[Y][X].addEventListener('drop', dropHandler)
+	matrix[Y][X].addEventListener('dragover', dragoverHandler)
 	if (Y==0) {
 	matrix[Y+1][X].draggable = true;
-	matrix[Y+1][X].addEventListener('dragstart', dragstart_handler)
+	matrix[Y+1][X].addEventListener('dragstart', dragstartHandler)
 	}
 	if (Y == side -1) {
 		matrix[Y-1][X].draggable = true;
-		matrix[Y-1][X].addEventListener('dragstart', dragstart_handler)
+		matrix[Y-1][X].addEventListener('dragstart', dragstartHandler)
 	}
 	if (Y > 0 && Y < side - 1) {
 		matrix[Y-1][X].draggable = true;
-		matrix[Y-1][X].addEventListener('dragstart', dragstart_handler)
+		matrix[Y-1][X].addEventListener('dragstart', dragstartHandler)
 		matrix[Y+1][X].draggable = true;
-		matrix[Y+1][X].addEventListener('dragstart', dragstart_handler)
+		matrix[Y+1][X].addEventListener('dragstart', dragstartHandler)
 	}
 	if (X==0) {
 	matrix[Y][X+1].draggable = true;
-	matrix[Y][X+1].addEventListener('dragstart', dragstart_handler)
+	matrix[Y][X+1].addEventListener('dragstart', dragstartHandler)
 	}
 	if (X == side -1) {
 		matrix[Y][X-1].draggable = true;
-		matrix[Y][X-1].addEventListener('dragstart', dragstart_handler)
+		matrix[Y][X-1].addEventListener('dragstart', dragstartHandler)
 	}
 	if (X > 0 && X < side -1) {
 		matrix[Y][X+1].draggable = true;
-		matrix[Y][X+1].addEventListener('dragstart', dragstart_handler)
+		matrix[Y][X+1].addEventListener('dragstart', dragstartHandler)
 		matrix[Y][X-1].draggable = true;
-		matrix[Y][X-1].addEventListener('dragstart', dragstart_handler)
+		matrix[Y][X-1].addEventListener('dragstart', dragstartHandler)
 	}
 	}
-function dragstart_handler(event) {
+function dragstartHandler(event) {
 		target = event.target
 		getTarget()
 		event.dataTransfer.effectAllowed = "move";
 }
-function dragover_handler(event) {
+function dragoverHandler(event) {
 		event.preventDefault();
 		event.dataTransfer.dropEffect = "move"
 }
-function drop_handler(event) {
+function dropHandler(event) {
 		
 		event.preventDefault();	
 		if ((Math.abs(X-x) == 1) && Y ==y) {
@@ -353,7 +355,7 @@ function drop_handler(event) {
 			matrix[Y][X].style.top = `${y * blockSize}px`;
 			[matrix[Y][X], matrix[y][x]] = [matrix[y][x], matrix[Y][X]];
 			Y = y;
-			moves++
+		
 			updatemoves()
 			compareToEtalon()
 			removeMoveClass()
@@ -365,9 +367,9 @@ const removeMoveClass = () => {
 		let tempArr = matrix.flat()
 		for(let i = 0; i <tempArr.length; i++) {
 			tempArr[i].draggable = false;
-			tempArr[i].removeEventListener('dragstart', dragstart_handler);
-			tempArr[i].removeEventListener('dragover', dragover_handler);
-			tempArr[i].removeEventListener('drop', drop_handler);
+			tempArr[i].removeEventListener('dragstart', dragstartHandler);
+			tempArr[i].removeEventListener('dragover', dragoverHandler);
+			tempArr[i].removeEventListener('drop', dropHandler);
 		}
 }
 
@@ -398,6 +400,8 @@ function showWin() {
 	clearInterval(stopwatch);
 	winWrapper.classList.add('winWrapper_active')
 	winText.innerHTML = `Hooray! You solved the puzzle in ${minutes.innerHTML}:${seconds.innerHTML} and ${moves} moves!`
+	field.removeEventListener('click', moveBlocks)
+	removeMoveClass()
 }
 
 function setRecord() {
@@ -420,7 +424,9 @@ function setRecord() {
 
 winWrapper.addEventListener('click', () => {
 	winWrapper.classList.remove('winWrapper_active')
-	winText.innerHTML = ''
+	winText.innerHTML = '';
+	removeMoveClass()
+
 })
 
 records.addEventListener('click', showRecords)
@@ -482,6 +488,7 @@ easyModeButton.addEventListener('click', () => {
 	makeEtalonArray()
 	removeMoveClass()
 	addMoveClass()
+	field.addEventListener('click', moveBlocks)
 	sec = 0
  	min = 0
 	moves = 0
@@ -545,6 +552,7 @@ if(localStorage.getItem('lastSave')) {
 	makeEtalonArray()
 	removeMoveClass()
 	addMoveClass()
+	field.addEventListener('click', moveBlocks)
 	sec = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).seconds;
  	min = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).minutes;
 	moves = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).moves;
