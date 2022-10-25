@@ -511,7 +511,6 @@ function savegame() {
 		moves: `${moves}`,
 		side: `${side}`,
 		blocksNumber: `${blocksNumber}`,
-		blockSize: `${blockSize}`,
 	}
 
 	localStorage.setItem('lastSave', JSON.stringify(save));
@@ -541,7 +540,6 @@ if(localStorage.getItem('lastSave')) {
 	}
 	side = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).side;
 	blocksNumber = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).blocksNumber;
-	blockSize = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).blockSize;
 	createBlocks()
 	buildMatrix()
 	compareArrays(JSON.parse(localStorage.getItem('lastSave')))

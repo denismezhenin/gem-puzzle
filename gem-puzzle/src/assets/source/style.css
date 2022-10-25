@@ -78,6 +78,7 @@ body {
 .block0 {
   background-color: aqua;
   color: aqua;
+  border: none;
 }
 
 .winWrapper p {
