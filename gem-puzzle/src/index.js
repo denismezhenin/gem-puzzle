@@ -7,6 +7,7 @@ const restartButton = document.createElement('button')
 const soundButton = document.createElement('button')
 const easyModeButton = document.createElement('button')
 const saveButton = document.createElement('button')
+const loadButton = document.createElement('button')
 const records = document.createElement('button')
 const movesIndicator = document.createElement('span')
 const timesIndicator = document.createElement('div')
@@ -51,6 +52,7 @@ menu.append(selectionsLabel)
 menu.append(selections)
 menu.append(easyModeButton)
 menu.append(saveButton)
+menu.append(loadButton)
 menu.append(records)
 selections.append(blocksField3x3)
 selections.append(blocksField4x4)
@@ -64,6 +66,7 @@ selectionsLabel.innerHTML = "Chose your field size"
 easyModeButton.innerHTML = 'Easy mode'
 restartButton.innerHTML = 'Shuffle and start'
 saveButton.innerHTML = 'Save'
+loadButton.innerHTML = 'Load'
 records.innerHTML = 'Records'
 let moves = 0
 movesIndicator.innerHTML = `Moves: ${moves}`
@@ -102,6 +105,7 @@ selections.addEventListener('change', function(){
 	blocksNumber = Math.pow(side, 2);
 	blockSize = fieldWidth / side;
   });
+//   console.log(selections.value)
 
 const createBlocks = () => {
 	for(let i=0; i <blocksNumber; i++) {
@@ -527,9 +531,13 @@ function compareArrays(arr) {
 	}
 }
 
-window.addEventListener('load', checkLocalStorage)
+loadButton.addEventListener('click', checkLocalStorage)
+
 
 function checkLocalStorage() {
+	if(!localStorage.getItem('lastSave')) {
+		return
+	}
 if(localStorage.getItem('lastSave')) {
 	matrix.length = 0
 	etalon.length = 0
@@ -540,6 +548,7 @@ if(localStorage.getItem('lastSave')) {
 	}
 	side = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).side;
 	blocksNumber = (JSON.parse(localStorage.getItem('lastSaveIndicators'))).blocksNumber;
+	blockSize = fieldWidth / side;
 	createBlocks()
 	buildMatrix()
 	compareArrays(JSON.parse(localStorage.getItem('lastSave')))
